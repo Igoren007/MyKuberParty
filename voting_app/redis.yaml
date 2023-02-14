@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: redis:alpine
+          image: redis:6-bullseye
           ports:
             - containerPort: 6379
               name: redis
