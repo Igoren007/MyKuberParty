@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
+  namespace: my-app
 spec:
   replicas: 1
   selector:
@@ -17,14 +18,32 @@ spec:
         image: postgres:13
         env:
           - name: POSTGRES_PASSWORD
-            value: postgres
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_PASSWORD
           - name: POSTGRES_USER
-            value: postgres
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_USER
           - name: POSTGRES_DB
-            value: postgres
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_DATABASE
         resources:
           limits:
             memory: "128Mi"
             cpu: "250m"
         ports:
-        - containerPort: 5432
+          - containerPort: 5432
+        volumeMounts:
+          - name: postgres-data
+            mountPath: /var/lib/postgresql/data
+            subPath: postgres
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim: 
+            claimName: db-pvc
+          

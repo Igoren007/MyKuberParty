@@ -1,0 +1,68 @@
+{% extends 'ToDo/home_base.html' %}
+{% load static %}
+
+{% block rightbar %}
+    <a class="create__task-btn" href="{% url 'create_task' %}">Создать задачу</a>
+    <div class="tasks__wrap">
+        <div class="tasks__active_wrap">
+            <div class="tasks__header">
+                <div class="tasks__active_title">Актуальные задачи</div>
+                <div class="tasks__active_info">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-error">{{ task_create_form.non_field_errors }}</div>
+                        {% for field in sort_form %}
+                                {{ field }}
+                        {% endfor%}
+                        <input type="submit" class="sort__btn" value="Применить">
+                    </form>
+                </div>
+            </div>
+
+            <div class="tasks__active">
+
+                {% for task in tasks_active %}
+                    {% if not task.is_finished %}
+
+                        <div class="task {{ task.priority }}">
+                            <div class="task__title">
+                                <a class="task__edit-link" href="{% url 'task-edit' task.id %}" title="Редактировать">{{ task.title }}</a>
+                            </div>
+                            <div class="task__descr">{{ task.descr }}</div>
+                            <div class="task__created_at">{{ task.created_at|date:'d-m-Y H:i' }}</div>
+                            <a href="{% url 'task_make_done' task.id %}" onclick="return proverka();"><img class="task__done_img" src="{% static 'ToDo/images/done.png' %}" alt="done task"></a>
+                            <a href="{% url 'task_delete' task.id %}" onclick="return proverka();"><img class="task__delete_img" src="{% static 'ToDo/images/delete.png' %}" alt="delete task"></a>
+
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tasks__completed_wrap">
+            <div class="tasks__header">
+                <div class="tasks__active_title">Недавно выполненные</div>
+            </div>
+            <div class="tasks__completed">
+                {% for task in tasks_finished %}
+                    {% if task.is_finished %}
+                        <div class="task {{ task.priority }}">
+                            <div class="task__title">{{ task.title }}</div>
+                            <div class="task__descr">{{ task.descr }}</div>
+                            <div class="task__created_at">{{ task.created_at|date:'Y-m-d H:i' }}</div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+    </div>
+
+    <script>
+        function proverka() {
+            if (confirm("Подтверждаете действие?")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    </script>
+{% endblock %}

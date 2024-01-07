@@ -1,0 +1,109 @@
+{% extends 'ToDo/home_base.html' %}
+{% load static %}
+
+{% block scripts %}
+    {#    скрипты для отрисовки графиков #}
+    <!-- Chart js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js" integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    {#    скрипты для фомы выбора даты #}
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- XDSoft DateTimePicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+{% endblock %}
+
+
+{% block rightbar %}
+
+    <div class="statistic__wrap">
+        <div class="tasks__header">
+            <div class="tasks__active_title">Статистика</div>
+            <div class="tasks__active_info">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-error">{{ task_create_form.non_field_errors }}</div>
+                    {{ date_form.start_date }}
+                    {{ date_form.end_date }}
+                    <input type="submit" class="sort__btn" value="Применить">
+                </form>
+            </div>
+        </div>
+        <div class="stat__data">
+            {% if data %}
+                <div class="stat__data-item">Всего поставлено задач: {{ data.all }}</div>
+                <div class="stat__data-item">Всего выполнено: {{ data.finished }}</div>
+                <div class="stat__data-item">Процент выполненых: {{ data.percent }}</div>
+                <div class="chart">
+                    <canvas id="myChart" width="400" height="200"></canvas>
+                </div>
+
+            {% endif %}
+        </div>
+
+    </div>
+
+    <script>
+      $(function () {
+        $("#id_start_date").datetimepicker({
+          value: Date(),
+          format: 'd/m/Y',
+          timepicker:false,
+        });
+        $("#id_end_date").datetimepicker({
+          value: Date(),
+          format: 'd/m/Y',
+          timepicker:false,
+        });
+      });
+    </script>
+
+    <script>
+
+    const ctx = document.getElementById('myChart');
+    const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ x_axis|safe }},
+        datasets: [{
+            label: 'Количество выполненных задач по дням',
+            data: {{ y_axis|safe }},
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Количество выполненных задач по дням',
+                weight: 'bold'
+            },
+            legend: false // Hide legend
+        }
+    }
+});
+
+    </script>
+{% endblock %}

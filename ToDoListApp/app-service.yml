@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: myapp
+  name: app-svc
+  namespace: my-app
 spec:
   type: ClusterIP
   selector:
-    app: myapp
+    component: app
   ports:
-  - port: <Port>
-    targetPort: <Target Port>
+  - port: 8000
