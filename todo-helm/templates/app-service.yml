@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-app-svc
+  namespace: my-app
+spec:
+  type: {{ .Values.appservice.type }}
+  selector:
+    component: app
+  ports:
+  - port: {{ .Values.appservice.port }}

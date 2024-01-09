@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  namespace: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+      - name: todolist-app
+        image:  todo-app
+        imagePullPolicy: Never
+        args: [/bin/sh, -c, 'python3 manage.py runserver 0.0.0.0:8000']
+        env:
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_PASSWORD
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_USER
+          - name: DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DB_DATABASE
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: todo-secret
+                key: DJANGO_SECRET_KEY
+          - name: DB_HOST
+            value: db-svc.my-app.svc
+          - name: DB_PORT
+            value: '5432'
+          - name: DB_ENGINE
+            value: django.db.backends.postgresql_psycopg2
+          - name: LOG_FILE
+            value: /var/log/container/app.log
+          - name: RABBIT_MQ_HOST
+            value: '192.168.122.86'
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+          - containerPort: 8000
+        volumeMounts:
+          - name: data-from-configmap
+            mountPath: /var/test-configmap
+            readOnly: true
+      volumes:
+        - name: data-from-configmap
+          configMap: 
+            name: my-config
